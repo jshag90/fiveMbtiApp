@@ -60,7 +60,8 @@ interface MbtiApiService {
 
 // Retrofit client setup with lenient Gson parsing
 object RetrofitClient {
-    private const val BASE_URL = "http://192.168.0.12:8085/" // Use 10.0.2.2 for emulator to access localhost
+   // private const val BASE_URL = "http://192.168.0.12:8085/" // Use 10.0.2.2 for emulator to access localhost
+    private const val BASE_URL = "http://152.67.209.165:9081/fivembti/" //prod
     val apiService: MbtiApiService by lazy {
         val gson = GsonBuilder()
             .setLenient() // Enable lenient JSON parsing for /results/{type}
