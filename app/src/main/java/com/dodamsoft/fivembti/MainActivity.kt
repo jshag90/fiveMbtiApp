@@ -1,5 +1,7 @@
 package com.dodamsoft.fivembti
 
+import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -8,6 +10,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -24,6 +27,7 @@ import retrofit2.http.GET
 import retrofit2.http.Path
 import com.google.gson.GsonBuilder
 import okhttp3.ResponseBody
+import androidx.compose.ui.platform.LocalContext
 
 // Data class for MBTI result response
 data class MbtiResponse(
@@ -70,17 +74,32 @@ object RetrofitClient {
 }
 
 class MainActivity : ComponentActivity() {
+    @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             FiveMbtiTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                Scaffold(
+                    topBar = {
+                        CenterAlignedTopAppBar(
+                            title = {
+                                Text("5초MBTI")
+                            },
+                            colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                                containerColor = MaterialTheme.colorScheme.primary,
+                                titleContentColor = MaterialTheme.colorScheme.onPrimary
+                            )
+                        )
+                    },
+                    modifier = Modifier.fillMaxSize()
+                ) { innerPadding ->
                     MbtiTestScreen(modifier = Modifier.padding(innerPadding))
                 }
             }
         }
     }
+
 }
 
 @Composable
@@ -112,6 +131,8 @@ fun MbtiTestScreen(modifier: Modifier = Modifier) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
+        val context = LocalContext.current
+
         when {
             isLoading -> {
                 // Show loading state
@@ -182,6 +203,7 @@ fun MbtiTestScreen(modifier: Modifier = Modifier) {
                         textAlign = TextAlign.Center,
                         modifier = Modifier.padding(top = 8.dp)
                     )
+
                     Button(
                         onClick = {
                             // Reset quiz
@@ -210,12 +232,34 @@ fun MbtiTestScreen(modifier: Modifier = Modifier) {
                             Text("다시하기")
                         }
                     }
+
+                    Button(
+                        onClick = {
+                            result?.let {
+                                shareMbtiResult(context, it)
+                            }
+                        },
+                        modifier = Modifier.padding(top = 16.dp)
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Share,
+                                contentDescription = "Share",
+                                modifier = Modifier.size(24.dp)
+                            )
+                            Text("공유하기")
+                        }
+                    }
+
                 }
             }
             currentQuestion != null && currentQuestionIndex < 4 -> {
                 // Display current question
                 Text(
-                    text = "Question ${currentQuestionIndex + 1}: $currentQuestion",
+                    text = "Question ${currentQuestionIndex + 1}.\n$currentQuestion",
                     style = MaterialTheme.typography.headlineSmall,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.padding(bottom = 32.dp)
@@ -259,6 +303,29 @@ fun MbtiTestScreen(modifier: Modifier = Modifier) {
             }
         }
     }
+}
+
+fun shareMbtiResult(context: Context, result: MbtiResponse) {
+    val message = """
+        [5초MBTI 테스트 결과]
+        
+        나의 MBTI는 ${result.typeEnum} (${result.typeNickName})!
+        
+        ${result.description}
+        
+        연예인: ${result.similarCelebrities}
+        유명인: ${result.famousCelebrities}
+        역사인물: ${result.historicalFigures}
+        
+        👉 5초만에 MBTI 확인하기: https://yourapp.link
+    """.trimIndent()
+
+    val intent = Intent(Intent.ACTION_SEND).apply {
+        type = "text/plain"
+        putExtra(Intent.EXTRA_TEXT, message)
+    }
+    val chooser = Intent.createChooser(intent, "결과 공유하기")
+    context.startActivity(chooser)
 }
 
 // Function to compute MBTI type from answers
