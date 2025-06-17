@@ -233,13 +233,13 @@ fun MbtiTestScreen(modifier: Modifier = Modifier) {
                     Text(
                         text = "· 연예인: ${result!!.similarCelebrities}",
                         style = MaterialTheme.typography.bodyMedium,
-                        textAlign = TextAlign.Start,
+                        textAlign = TextAlign.Center,
                         modifier = Modifier.fillMaxWidth()
                     )
                     Text(
                         text = "· 유명인: ${result!!.famousCelebrities}",
                         style = MaterialTheme.typography.bodyMedium,
-                        textAlign = TextAlign.Start,
+                        textAlign = TextAlign.Center,
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(top = 8.dp)
@@ -247,7 +247,7 @@ fun MbtiTestScreen(modifier: Modifier = Modifier) {
                     Text(
                         text = "· 역사인물: ${result!!.historicalFigures}",
                         style = MaterialTheme.typography.bodyMedium,
-                        textAlign = TextAlign.Start,
+                        textAlign = TextAlign.Center,
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(top = 8.dp)
