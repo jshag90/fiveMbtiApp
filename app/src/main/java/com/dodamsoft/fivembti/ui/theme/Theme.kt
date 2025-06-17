@@ -9,17 +9,17 @@ import androidx.compose.ui.platform.LocalContext
 
 // 부드러운 BlueGray/Teal 기반 팔레트
 private val LightColorScheme = lightColorScheme(
-    primary = Color(0xFF006D77),        // Teal
+    primary = Color(0xFF006F77),        // Teal (변경됨)
     onPrimary = Color.White,
     primaryContainer = Color(0xFFB2DFDB),
     onPrimaryContainer = Color(0xFF00332C),
 
-    secondary = Color(0xFF83C5BE),      // Light mint
+    secondary = Color(0xFF83C5BE),
     onSecondary = Color.Black,
     secondaryContainer = Color(0xFFE0FBFC),
     onSecondaryContainer = Color(0xFF003B3B),
 
-    tertiary = Color(0xFFFFB703),       // Soft orange
+    tertiary = Color(0xFFFFB703),
     onTertiary = Color.Black,
     background = Color(0xFFFAFAFA),
     surface = Color(0xFFFFFFFF),
@@ -33,7 +33,7 @@ private val DarkColorScheme = darkColorScheme(
     primaryContainer = Color(0xFF004D40),
     onPrimaryContainer = Color.White,
 
-    secondary = Color(0xFF006D77),
+    secondary = Color(0xFF006F77),     // Teal (변경됨)
     onSecondary = Color.White,
     secondaryContainer = Color(0xFF264653),
     onSecondaryContainer = Color.White,
@@ -49,7 +49,7 @@ private val DarkColorScheme = darkColorScheme(
 @Composable
 fun FiveMbtiTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    dynamicColor: Boolean = true,
+    dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {

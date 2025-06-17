@@ -4,11 +4,14 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.view.Gravity
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.*
@@ -28,6 +31,10 @@ import retrofit2.http.Path
 import com.google.gson.GsonBuilder
 import okhttp3.ResponseBody
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.zIndex
+import kotlinx.coroutines.delay
 
 // Data class for MBTI result response
 data class MbtiResponse(
@@ -79,29 +86,58 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
         setContent {
             FiveMbtiTheme {
-                Scaffold(
-                    topBar = {
-                        CenterAlignedTopAppBar(
-                            title = {
-                                Text("5초MBTI")
-                            },
-                            colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                                containerColor = MaterialTheme.colorScheme.primary,
-                                titleContentColor = MaterialTheme.colorScheme.onPrimary
+                val snackbarHostState = remember { SnackbarHostState() }
+
+                LaunchedEffect(snackbarHostState) {
+                    delay(1000)
+                    snackbarHostState.showSnackbar(
+                        message = "👤 5초만에 나의 성격유형, 지금 바로 확인해보세요!",
+                        duration = SnackbarDuration.Short
+                    )
+                }
+
+                Box(modifier = Modifier.fillMaxSize()) {
+                    // Scaffold 내부 콘텐츠
+                    Scaffold(
+                        topBar = {
+                            CenterAlignedTopAppBar(
+                                title = { Text(
+                                    "\uD83D\uDC64 5초MBTI",
+                                    fontWeight = FontWeight.Bold,
+                                    fontFamily = FontFamily.SansSerif // 원하는 폰트로 변경 가능
+                                ) },
+                                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                                    containerColor = MaterialTheme.colorScheme.primary,
+                                    titleContentColor = MaterialTheme.colorScheme.onPrimary
+                                )
                             )
-                        )
-                    },
-                    modifier = Modifier.fillMaxSize()
-                ) { innerPadding ->
-                    MbtiTestScreen(modifier = Modifier.padding(innerPadding))
+                        },
+                        modifier = Modifier.fillMaxSize()
+                    ) { innerPadding ->
+                        MbtiTestScreen(modifier = Modifier.padding(innerPadding))
+                    }
+
+                    // 상단에 표시할 SnackbarHost
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 130.dp) // TopAppBar 높이만큼 띄움
+                            .align(Alignment.TopCenter)
+                            .zIndex(1f) // 위에 표시되도록 zIndex 지정
+                    ) {
+                        SnackbarHost(hostState = snackbarHostState)
+                    }
                 }
             }
         }
-    }
 
+
+    }
 }
+
 
 @Composable
 fun MbtiTestScreen(modifier: Modifier = Modifier) {
@@ -186,24 +222,43 @@ fun MbtiTestScreen(modifier: Modifier = Modifier) {
                         textAlign = TextAlign.Center,
                         modifier = Modifier.padding(top = 16.dp)
                     )
+
+                }
+
+                // 기존 다른 텍스트들과 분리된 영역으로 따로 Column 생성
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.padding(16.dp)
+                ) {
                     Text(
-                        text = "연예인: ${result!!.similarCelebrities}",
+                        text = "· 연예인: ${result!!.similarCelebrities}",
                         style = MaterialTheme.typography.bodyMedium,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.padding(top = 16.dp)
+                        textAlign = TextAlign.Start,
+                        modifier = Modifier.fillMaxWidth()
                     )
                     Text(
-                        text = "유명인: ${result!!.famousCelebrities}",
+                        text = "· 유명인: ${result!!.famousCelebrities}",
                         style = MaterialTheme.typography.bodyMedium,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.padding(top = 8.dp)
+                        textAlign = TextAlign.Start,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 8.dp)
                     )
                     Text(
-                        text = "역사인물: ${result!!.historicalFigures}",
+                        text = "· 역사인물: ${result!!.historicalFigures}",
                         style = MaterialTheme.typography.bodyMedium,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.padding(top = 8.dp)
+                        textAlign = TextAlign.Start,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 8.dp)
                     )
+                }
+
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.padding(16.dp)
+                ) {
+
 
                     Button(
                         onClick = {
@@ -255,7 +310,10 @@ fun MbtiTestScreen(modifier: Modifier = Modifier) {
                         }
                     }
 
+
                 }
+
+
             }
             currentQuestion != null && currentQuestionIndex < 4 -> {
                 // Display current question
@@ -282,7 +340,19 @@ fun MbtiTestScreen(modifier: Modifier = Modifier) {
                             isLoading = true
                         }
                     }) {
-                        Text("YES")
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = Icons.Default.Check,
+                                contentDescription = "Check icon",
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text(
+                                "예"
+                                , fontWeight = FontWeight.Bold
+                                , fontFamily = FontFamily.SansSerif
+                            )
+                        }
                     }
                     Button(onClick = {
                         answers.add(false) // false maps to I, S, T, or J
@@ -298,7 +368,19 @@ fun MbtiTestScreen(modifier: Modifier = Modifier) {
                             isLoading = true
                         }
                     }) {
-                        Text("NO")
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = Icons.Default.Check,
+                                contentDescription = "Check icon",
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text(
+                                "아니오"
+                                , fontWeight = FontWeight.Bold
+                                , fontFamily = FontFamily.SansSerif
+                            )
+                        }
                     }
                 }
             }
