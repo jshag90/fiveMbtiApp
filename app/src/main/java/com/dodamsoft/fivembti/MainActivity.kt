@@ -401,9 +401,9 @@ fun shareMbtiResult(context: Context, result: MbtiResponse) {
         유명인: ${result.famousCelebrities}
         역사인물: ${result.historicalFigures}
         
-        👉 [5초만에 MBTI 확인하기] 
-        - 구글플레이스토어 : ${googlePlayStoreUrl}
-        - 아이폰 앱스토어 : 미지원
+        👉 [5초만에 MBTI 확인하기]  
+        - Android (구글 플레이 스토어): ${googlePlayStoreUrl}  
+        - iOS (앱스토어): 아직 지원하지 않아요
     """.trimIndent()
 
     val intent = Intent(Intent.ACTION_SEND).apply {
