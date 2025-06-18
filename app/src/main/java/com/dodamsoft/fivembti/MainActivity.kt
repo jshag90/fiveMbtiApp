@@ -33,7 +33,13 @@ import okhttp3.ResponseBody
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.zIndex
+import androidx.core.view.WindowCompat
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.AdSize
+import com.google.android.gms.ads.AdView
+import com.google.android.gms.ads.MobileAds
 import kotlinx.coroutines.delay
 
 // Data class for MBTI result response
@@ -86,7 +92,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-
+        MobileAds.initialize(this)
         setContent {
             FiveMbtiTheme {
                 val snackbarHostState = remember { SnackbarHostState() }
@@ -100,43 +106,65 @@ class MainActivity : ComponentActivity() {
                 }
 
                 Box(modifier = Modifier.fillMaxSize()) {
-                    // Scaffold 내부 콘텐츠
-                    Scaffold(
-                        topBar = {
-                            CenterAlignedTopAppBar(
-                                title = { Text(
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(WindowInsets.navigationBars.asPaddingValues()),
+                        verticalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        // 상단 TopAppBar
+                        CenterAlignedTopAppBar(
+                            title = {
+                                Text(
                                     "\uD83D\uDC64 5초MBTI",
                                     fontWeight = FontWeight.Bold,
-                                    fontFamily = FontFamily.SansSerif // 원하는 폰트로 변경 가능
-                                ) },
-                                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                                    containerColor = MaterialTheme.colorScheme.primary,
-                                    titleContentColor = MaterialTheme.colorScheme.onPrimary
+                                    fontFamily = FontFamily.SansSerif
                                 )
-                            )
-                        },
-                        modifier = Modifier.fillMaxSize()
-                    ) { innerPadding ->
-                        MbtiTestScreen(modifier = Modifier.padding(innerPadding))
+                            },
+                            colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                                containerColor = MaterialTheme.colorScheme.primary,
+                                titleContentColor = MaterialTheme.colorScheme.onPrimary
+                            ),
+                            modifier = Modifier.fillMaxWidth()
+                        )
+
+                        // 중간 콘텐츠 (MbtiTestScreen)
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .weight(0.9f) // MbtiTestScreen이 70% 차지
+                                .padding(horizontal = 16.dp, vertical = 8.dp)
+                        ) {
+                            MbtiTestScreen()
+                        }
+
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .weight(0.1f) // Footer가 30% 차지
+                                .height(50.dp) // Footer 높이 고정
+                        ) {
+                            Footer()
+                        }
+
                     }
 
-                    // 상단에 표시할 SnackbarHost
+                    // 상단에 표시할 SnackbarHost (TopAppBar 밑에 띄우기)
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(top = 130.dp) // TopAppBar 높이만큼 띄움
+                            .padding(top = 60.dp) // TopAppBar 높이 감안
                             .align(Alignment.TopCenter)
-                            .zIndex(1f) // 위에 표시되도록 zIndex 지정
+                            .zIndex(1f)
                     ) {
                         SnackbarHost(hostState = snackbarHostState)
                     }
                 }
             }
         }
-
-
     }
 }
+
 
 
 @Composable
@@ -475,4 +503,39 @@ fun MbtiTestPreview() {
     FiveMbtiTheme {
         MbtiTestScreen()
     }
+}
+
+@Composable
+fun Footer() {
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(50.dp), // 광고 높이 설정
+        contentAlignment = Alignment.BottomCenter
+    ) {
+        AdViewComponent()
+    }
+
+}
+
+@Composable
+fun AdViewComponent() {
+    val context = LocalContext.current
+    val adView = remember { AdView(context) }
+    val adUnitId = "ca-app-pub-6669682457787065/7693799323"
+    //TEST Ad unit ID : ca-app-pub-3940256099942544/6300978111
+
+    LaunchedEffect(Unit) {
+        adView.setAdSize(AdSize.BANNER)
+        adView.adUnitId = adUnitId
+        val adRequest = AdRequest.Builder().build()
+        adView.loadAd(adRequest)
+    }
+
+    AndroidView(
+        factory = { adView },
+        modifier = Modifier
+            .fillMaxWidth()
+    )
 }
