@@ -150,7 +150,7 @@ class MainActivity : ComponentActivity() {
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(top = 60.dp) // TopAppBar 높이 감안
+                            .padding(top = 120.dp) // TopAppBar 높이 감안
                             .align(Alignment.TopCenter)
                             .zIndex(1f)
                     ) {
